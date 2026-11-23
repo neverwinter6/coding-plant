@@ -1,8 +1,9 @@
 import { buildTree } from "./tree.js";
 
 const TAU = Math.PI * 2;
-const STORAGE_KEY = "perennial.session.v1";
+const STORAGE_KEY = "perennial.session.v2";
 const MAX_STORED_GAP = 6 * 60 * 60 * 1000;
+const GERMINATION_SECONDS = 4;
 const TREE_FULL_AT = 180;
 const LEAF_BURST_MS = 1500;
 const MONO = '"DM Mono", "Cascadia Mono", Menlo, Consolas, monospace';
@@ -15,37 +16,37 @@ const STAGES = [
     caption: "The seed is listening for a reason to begin.",
   },
   {
-    at: 3,
+    at: 6,
     name: "SPROUT",
     label: "SPROUT",
     caption: "A small fracture of green, looking for the sun.",
   },
   {
-    at: 9,
+    at: 16,
     name: "SAPLING",
     label: "SAPLING",
     caption: "It has decided that up is worth the effort.",
   },
   {
-    at: 24,
+    at: 35,
     name: "YOUNG TREE",
     label: "YOUNG TREE",
     caption: "Branches negotiate their share of the sky.",
   },
   {
-    at: 50,
+    at: 65,
     name: "CANOPY",
     label: "CANOPY",
     caption: "A private climate is assembling overhead.",
   },
   {
-    at: 120,
+    at: 140,
     name: "OLD GROWTH",
     label: "OLD GROWTH",
     caption: "What started as syntax is now a silhouette.",
   },
   {
-    at: 240,
+    at: 260,
     name: "ANCIENT",
     label: "ANCIENT",
     caption: "Still adding to itself, one character at a time.",
@@ -276,9 +277,9 @@ function loadState() {
 
   return {
     seed: makeSeed(),
-    // A new visitor meets an established tree rather than an empty pot.
-    elapsedMs: 40000,
-    growthMs: 40000,
+    // Every specimen begins as a seed in the dark.
+    elapsedMs: 0,
+    growthMs: 0,
     keys: 0,
     paused: false,
     createdAt: Date.now(),
@@ -337,10 +338,11 @@ function tick() {
 
 function growthClock() {
   const seconds = state.growthMs / 1000;
+  const activeSeconds = Math.max(0, seconds - GERMINATION_SECONDS);
   const normalized =
-    (1 - Math.exp(-seconds / 22)) / (1 - Math.exp(-TREE_FULL_AT / 22));
+    (1 - Math.exp(-activeSeconds / 22)) / (1 - Math.exp(-TREE_FULL_AT / 22));
   const clamped = clamp(normalized, 0, 1);
-  const late = Math.max(0, seconds - TREE_FULL_AT) * 0.7;
+  const late = Math.max(0, activeSeconds - TREE_FULL_AT) * 0.7;
   return {
     clock: clamped * tree.completion + late,
     progress: clamped,
@@ -477,6 +479,7 @@ function draw(now) {
 
   ctx.setTransform(render.dpr, 0, 0, render.dpr, 0, 0);
   ctx.clearRect(0, 0, render.W, render.H);
+  drawGerminationGlow(ctx, growth.clock, now);
   drawSpecks(ctx, now);
   paintGrid(ctx);
   drawParticles(ctx, now);
@@ -911,11 +914,34 @@ function drawSoil(clock) {
     }
   }
 
-  if (clock < 2.2) {
-    setCell(centerCol - 1, baseRow - 1, "(", P.root, 2);
-    setCell(centerCol, baseRow - 1, ".", P.root, 2);
-    setCell(centerCol + 1, baseRow - 1, ")", P.root, 2);
+  if (clock < 2.8) {
+    // A seed, drawn as a small lit pod above the soil line.
+    setCell(centerCol - 1, baseRow - 3, ".", P.trunk, 7);
+    setCell(centerCol, baseRow - 3, "-", P.trunk, 7);
+    setCell(centerCol + 1, baseRow - 3, ".", P.trunk, 7);
+    setCell(centerCol - 2, baseRow - 2, "(", P.trunk, 7);
+    setCell(centerCol, baseRow - 2, "o", P.bloom, 7);
+    setCell(centerCol + 2, baseRow - 2, ")", P.trunk, 7);
+    setCell(centerCol - 1, baseRow - 1, "`", P.root, 7);
+    setCell(centerCol, baseRow - 1, "-", P.root, 7);
+    setCell(centerCol + 1, baseRow - 1, "'", P.root, 7);
+    setCell(centerCol, baseRow, "|", P.root, 7);
   }
+}
+
+function drawGerminationGlow(ctx, clock, now) {
+  if (clock > 2.8) return;
+  const ground = project(0, 0);
+  const x = ground.px;
+  const y = ground.py - render.lineH * 1.7;
+  const pulse = reduceMotion ? 1 : 0.86 + 0.14 * Math.sin(now * 0.0018);
+  const radius = Math.max(42, render.charW * 8);
+  const glow = ctx.createRadialGradient(x, y, 0, x, y, radius);
+  glow.addColorStop(0, `rgba(232, 190, 122, ${0.22 * pulse})`);
+  glow.addColorStop(0.38, `rgba(198, 241, 132, ${0.08 * pulse})`);
+  glow.addColorStop(1, "rgba(7, 16, 11, 0)");
+  ctx.fillStyle = glow;
+  ctx.fillRect(x - radius, y - radius, radius * 2, radius * 2);
 }
 
 function drawSpecks(ctx, now) {

@@ -4,7 +4,7 @@
 
 [**Live site → coding-plant.vercel.app**](https://coding-plant.vercel.app/)
 
-Perennial is a small, dependency-free web experiment: a procedural tree drawn entirely with characters, growing in real time. Leave the tab open while you work. Type into the field-note line and the tree takes a little of that energy for itself.
+Perennial is a small, dependency-free web experiment: a procedural tree drawn entirely with characters, growing in real time from a single seed. Leave the tab open while you work. Type into the field-note line and the tree takes a little of that energy for itself.
 
 ![Perennial](og.png)
 
@@ -39,7 +39,7 @@ Then open [http://127.0.0.1:4173](http://127.0.0.1:4173). There are no dependenc
 | **Copy ASCII** | Copies the current tree and session details to the clipboard |
 | **Save .txt** | Downloads the current tree as plain text |
 
-Session state lives only in your browser under `perennial.session.v1`. Typed text is never stored — only the number of keys offered.
+Session state lives only in your browser under `perennial.session.v2`. Typed text is never stored — only the number of keys offered.
 
 ## How it works
 
