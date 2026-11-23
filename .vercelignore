@@ -1,0 +1,6 @@
+.qa/
+.git/
+server.mjs
+README.md
+LICENSE
+package.json

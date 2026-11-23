@@ -1,0 +1,11 @@
+{
+  "name": "perennial",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "A living ASCII tree that grows while you code.",
+  "scripts": {
+    "dev": "node server.mjs",
+    "start": "node server.mjs"
+  }
+}
