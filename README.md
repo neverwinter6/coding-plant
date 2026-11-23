@@ -2,6 +2,8 @@
 
 **A live ASCII tree that grows while you code.**
 
+[**Live site → coding-plant.vercel.app**](https://coding-plant.vercel.app/)
+
 Perennial is a small, dependency-free web experiment: a procedural tree drawn entirely with characters, growing in real time. Leave the tab open while you work. Type into the field-note line and the tree takes a little of that energy for itself.
 
 ![Perennial](og.png)

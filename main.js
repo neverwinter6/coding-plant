@@ -276,9 +276,9 @@ function loadState() {
 
   return {
     seed: makeSeed(),
-    // A new visitor meets an established seedling rather than an empty pot.
-    elapsedMs: 22000,
-    growthMs: 22000,
+    // A new visitor meets an established tree rather than an empty pot.
+    elapsedMs: 40000,
+    growthMs: 40000,
     keys: 0,
     paused: false,
     createdAt: Date.now(),
