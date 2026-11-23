@@ -100,8 +100,13 @@ const PALETTE = [
 ];
 
 const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+const VSCODE_MODE = typeof acquireVsCodeApi === "function";
 
 const els = {};
+let vscodeApi = null;
+let vscodeConnected = false;
+let vscodeActive = false;
+let lastVscodeSync = 0;
 let state;
 let tree;
 let camera;
@@ -123,7 +128,20 @@ const particles = [];
 
 function init() {
   cacheElements();
-  state = loadState();
+  if (VSCODE_MODE) {
+    try {
+      vscodeApi = acquireVsCodeApi();
+    } catch {
+      // If the bridge is not available, fall back to a normal local session.
+    }
+    state = freshState();
+    document.body.classList.add("is-vscode");
+    document.querySelector(".brand")?.addEventListener("click", (event) => {
+      event.preventDefault();
+    });
+  } else {
+    state = loadState();
+  }
   tree = buildTree(state.seed);
   camera = { scale: 0, cx: 0, ready: false };
   render = {
@@ -160,6 +178,11 @@ function init() {
   resizeCanvas();
   updateLocalClock();
   updateUI(true);
+
+  if (VSCODE_MODE) {
+    window.addEventListener("message", handleVSCodeMessage);
+    vscodeApi?.postMessage({ type: "perennial:ready" });
+  }
 
   setInterval(tick, 250);
   setInterval(updateLocalClock, 1000);
@@ -275,6 +298,10 @@ function loadState() {
     // A fresh seed is a fine fallback.
   }
 
+  return freshState();
+}
+
+function freshState() {
   return {
     seed: makeSeed(),
     // Every specimen begins as a seed in the dark.
@@ -287,6 +314,7 @@ function loadState() {
 }
 
 function saveState() {
+  if (VSCODE_MODE) return;
   try {
     localStorage.setItem(
       STORAGE_KEY,
@@ -316,6 +344,16 @@ function makeSeed() {
 
 function tick() {
   const now = Date.now();
+
+  if (VSCODE_MODE) {
+    lastWall = now;
+    if (now - lastUiAt > 240) {
+      updateUI();
+      lastUiAt = now;
+    }
+    return;
+  }
+
   const delta = Math.min(MAX_STORED_GAP, Math.max(0, now - lastWall));
   lastWall = now;
 
@@ -331,6 +369,46 @@ function tick() {
   if (now - lastUiAt > 240) {
     updateUI();
     lastUiAt = now;
+  }
+}
+
+function handleVSCodeMessage(event) {
+  const message = event.data;
+  if (!message || message.type !== "perennial:sync") return;
+
+  const wasConnected = vscodeConnected;
+  const previousSeed = state.seed;
+  vscodeConnected = true;
+  vscodeActive = Boolean(message.active);
+  lastVscodeSync = Date.now();
+
+  const nextSeed = Number(message.seed);
+  if (Number.isFinite(nextSeed) && nextSeed !== state.seed) {
+    state.seed = nextSeed >>> 0;
+    tree = buildTree(state.seed);
+    camera = { scale: 0, cx: 0, ready: false };
+    render.specks = makeSpecks(render.cols, render.rows, state.seed);
+    particles.length = 0;
+    lastNoteKey = "";
+    lastStageIndex = -1;
+    uiCache.clear();
+    handleTyping.previous = "";
+    els.feedInput.value = "";
+  }
+
+  state.elapsedMs = Math.max(0, Number(message.elapsedMs) || 0);
+  state.growthMs = Math.max(0, Number(message.growthMs) || 0);
+  state.keys = Math.max(0, Number(message.keys) || 0);
+  state.paused = Boolean(message.paused);
+  state.createdAt = Number(message.createdAt) || state.createdAt;
+
+  updateStaticLabels();
+  updateUI(true);
+
+  if (!wasConnected) {
+    showToast("VS Code time connected. Your editor is feeding the tree.");
+  } else if (previousSeed !== state.seed && state.elapsedMs === 0) {
+    showToast(`a new seed from VS Code. specimen ${seedHex(state.seed)}.`);
   }
 }
 
@@ -1033,6 +1111,27 @@ function updateUI(force = false) {
   const visible = render.visible || { branches: 0, leaves: 0, maxY: 0 };
 
   const sessionText = formatClock(state.elapsedMs);
+  const vscodeStale =
+    VSCODE_MODE && (!vscodeConnected || now - lastVscodeSync > 6500);
+  const liveLabel = state.paused
+    ? "PAUSED"
+    : VSCODE_MODE
+      ? vscodeStale
+        ? "SYNC"
+        : vscodeActive
+          ? "VS CODE"
+          : "IDLE"
+      : "LIVE";
+  const statusLabel = state.paused
+    ? "PAUSED"
+    : VSCODE_MODE
+      ? vscodeStale
+        ? "WAITING"
+        : vscodeActive
+          ? "CODING"
+          : "IDLE"
+      : "GROWING";
+
   setText(els.sessionTime, sessionText);
   setText(els.stageName, stage.name);
   setText(els.stageCaption, stage.caption);
@@ -1040,19 +1139,46 @@ function updateUI(force = false) {
   setText(els.progressStage, stage.label);
   setText(els.progressNext, progress.next ? progress.next.label : "NO END");
   els.progressFill.style.width = `${(progress.ratio * 100).toFixed(1)}%`;
-  setText(els.growthStatus, state.paused ? "PAUSED" : "GROWING");
-  setText(els.growthRate, state.paused ? "—" : now - lastTypedAt < 1500 ? "1.8×" : "1.0×");
-  setText(els.liveChipText, state.paused ? "PAUSED" : "LIVE");
-  els.liveChip.dataset.state = state.paused ? "paused" : "live";
-  els.statusLight.classList.toggle("is-paused", state.paused);
+  setText(els.growthStatus, statusLabel);
+  setText(
+    els.growthRate,
+    state.paused || (VSCODE_MODE && !vscodeActive)
+      ? "—"
+      : now - lastTypedAt < 1500
+        ? "1.8×"
+        : "1.0×"
+  );
+  setText(els.liveChipText, liveLabel);
+  els.liveChip.dataset.state = state.paused
+    ? "paused"
+    : VSCODE_MODE && !vscodeActive
+      ? "idle"
+      : "live";
+  els.statusLight.classList.toggle(
+    "is-paused",
+    state.paused || (VSCODE_MODE && !vscodeActive)
+  );
   els.sessionBlock.classList.toggle("is-paused", state.paused);
 
-  const stateLabel = state.paused ? "PAUSED" : now - lastTypedAt < 1500 ? "FEEDING" : "FOCUS";
-  const noteLabel = state.paused
-    ? "growth suspended"
-    : now - lastTypedAt < 1500
-      ? "typing accelerates growth"
-      : "growing in real time";
+  let stateLabel;
+  let noteLabel;
+  if (state.paused) {
+    stateLabel = "PAUSED";
+    noteLabel = "growth suspended";
+  } else if (VSCODE_MODE) {
+    stateLabel = vscodeStale ? "WAITING" : vscodeActive ? "CODING" : "IDLE";
+    noteLabel = vscodeStale
+      ? "waiting for VS Code"
+      : vscodeActive
+        ? "synced with VS Code time"
+        : "focus VS Code to grow";
+  } else {
+    stateLabel = now - lastTypedAt < 1500 ? "FEEDING" : "FOCUS";
+    noteLabel =
+      now - lastTypedAt < 1500
+        ? "typing accelerates growth"
+        : "growing in real time";
+  }
   setText(els.sessionState, null, stateLabel);
   setText(els.sessionNote, noteLabel);
 
@@ -1208,7 +1334,12 @@ function handleTyping(event) {
   state.keys += accepted;
   state.growthMs += accepted * 165;
   lastTypedAt = Date.now();
-  saveState();
+
+  if (VSCODE_MODE) {
+    vscodeApi?.postMessage({ type: "perennial:typing", count: accepted });
+  } else {
+    saveState();
+  }
 
   els.stageHint.classList.add("is-feeding");
   clearTimeout(feedTimer);
@@ -1221,6 +1352,14 @@ function handleTyping(event) {
 }
 
 function togglePause() {
+  if (VSCODE_MODE) {
+    vscodeApi?.postMessage({
+      type: "perennial:control",
+      action: state.paused ? "resume" : "pause",
+    });
+    return;
+  }
+
   const now = Date.now();
   const delta = Math.min(MAX_STORED_GAP, Math.max(0, now - lastWall));
   lastWall = now;
@@ -1259,6 +1398,12 @@ function handleReset() {
   clearTimeout(resetTimer);
   els.resetButton.classList.remove("is-confirming");
   els.resetLabel.textContent = "new seed";
+
+  if (VSCODE_MODE) {
+    vscodeApi?.postMessage({ type: "perennial:control", action: "reset" });
+    showToast("a new seed is on its way from VS Code.");
+    return;
+  }
 
   const now = Date.now();
   state = {

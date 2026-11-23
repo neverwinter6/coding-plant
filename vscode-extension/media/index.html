@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#07100b">
+  <link rel="canonical" href="https://coding-plant.vercel.app/">
+  <title>Perennial — a tree that grows while you code</title>
+  <meta name="description" content="A living ASCII tree that grows in real time while you code. No images, no pixels — just characters, patience, and time.">
+  <meta name="author" content="Fabrizio">
+  <meta property="og:title" content="Perennial — a tree that grows while you code">
+  <meta property="og:description" content="A living ASCII tree that grows in real time. Leave it open while you build something.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://coding-plant.vercel.app/">
+  <meta property="og:image" content="https://coding-plant.vercel.app/og.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Perennial — a live ASCII tree on a dark green screen">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Perennial — a tree that grows while you code">
+  <meta name="twitter:description" content="A living ASCII tree that grows in real time. Leave it open while you build something.">
+  <meta name="twitter:image" content="https://coding-plant.vercel.app/og.png">
+  <link rel="icon" href="./favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <div class="atmosphere" aria-hidden="true">
+    <div class="atmosphere__glow atmosphere__glow--one"></div>
+    <div class="atmosphere__glow atmosphere__glow--two"></div>
+    <div class="atmosphere__grain"></div>
+    <div class="atmosphere__scanlines"></div>
+  </div>
+
+  <div class="shell">
+    <header class="topbar">
+      <a class="brand" href="/" aria-label="Perennial, home">
+        <span class="brand__mark" aria-hidden="true">
+          <svg viewBox="0 0 40 44" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="square">
+            <path d="M20 40V20M20 29 11 21M20 24l9-10M20 18V8"/>
+            <path d="m11 21-5-1M11 21l2-6M29 14l6-2M29 14l-1-6"/>
+            <circle cx="20" cy="5" r="1.4" fill="currentColor" stroke="none"/>
+            <circle cx="6" cy="20" r="1" fill="currentColor" stroke="none"/>
+            <circle cx="35" cy="12" r="1" fill="currentColor" stroke="none"/>
+          </svg>
+        </span>
+        <span class="brand__text">
+          <span class="brand__name">perennial<span class="brand__underscore">_</span></span>
+          <span class="brand__descriptor">an ascii organism</span>
+        </span>
+      </a>
+
+      <div class="topbar__rule" aria-hidden="true">
+        <span>grown from characters</span>
+      </div>
+
+      <div class="topbar__meta">
+        <div class="clock">
+          <span class="micro-label">LOCAL TIME</span>
+          <time id="localClock" datetime="">--:--:--</time>
+        </div>
+        <div class="live-chip" id="liveChip">
+          <span class="live-chip__dot" aria-hidden="true"></span>
+          <span id="liveChipText">LIVE</span>
+        </div>
+      </div>
+    </header>
+
+    <main class="main">
+      <section class="specimen" aria-labelledby="specimenTitle">
+        <h2 id="specimenTitle" class="sr-only">Live ASCII specimen</h2>
+
+        <div class="specimen__bar">
+          <div class="file-tab">
+            <span class="file-tab__dot" aria-hidden="true"></span>
+            <span id="fileName">specimen_001.txt</span>
+            <span class="file-tab__muted">— unsaved growth</span>
+          </div>
+          <div class="specimen__bar-right">
+            <span class="mode"><span class="mode__bracket">[</span> ASCII <span class="mode__bracket">]</span></span>
+            <span class="specimen__seed">SEED <b id="seedShort">0000</b></span>
+          </div>
+        </div>
+
+        <div class="stage" id="stage">
+          <canvas id="treeCanvas" role="img" aria-label="A live ASCII tree, currently a seed in dark soil"></canvas>
+          <pre id="treeAccessible" class="sr-only"></pre>
+
+          <div class="stage__chrome stage__chrome--tl" aria-hidden="true">
+            <span class="crosshair">+</span>
+            <span id="stageCode">GROWTH STUDY / 001</span>
+          </div>
+          <div class="stage__chrome stage__chrome--tr" aria-hidden="true">
+            <span>32.4°N&nbsp;&nbsp;12.5°E</span>
+          </div>
+
+          <div class="stage__readout">
+            <div class="stage__stage">
+              <span class="stage__index" id="stageIndex">01</span>
+              <span id="stageName">GERMINATION</span>
+            </div>
+            <p class="stage__caption" id="stageCaption">The seed is listening for a reason to begin.</p>
+          </div>
+
+          <div class="stage__hint" id="stageHint">
+            <span class="prompt-mark">&gt;</span>
+            <span>type below to nourish</span>
+            <span class="caret" aria-hidden="true"></span>
+          </div>
+
+          <div class="stage__grain" aria-hidden="true"></div>
+        </div>
+
+        <div class="specimen__foot">
+          <div class="status">
+            <span class="status__light" id="statusLight" aria-hidden="true"></span>
+            <span id="growthStatus">GROWING</span>
+            <span class="status__sep">/</span>
+            <span class="status__muted">RATE <b id="growthRate">1.0×</b></span>
+          </div>
+          <div class="status status--center">
+            <span class="status__muted">GLYPHS <b id="glyphCount">0</b></span>
+            <span class="status__sep">/</span>
+            <span class="status__muted">FRAME <b id="frameCount">000000</b></span>
+          </div>
+          <div class="specimen__actions">
+            <button class="text-button" id="copyButton" type="button">
+              <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M5 5V2h9v9h-3M2 5h9v9H2z"/></svg>
+              copy ascii
+            </button>
+            <button class="text-button" id="exportButton" type="button">
+              <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1v9m0 0 3-3m-3 3L5 7M2 12v2h12v-2"/></svg>
+              save .txt
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <aside class="sidebar" aria-label="Session information">
+        <section class="intro">
+          <p class="eyebrow"><span class="eyebrow__num">01</span> A LIVING INTERFACE</p>
+          <h1>A tree that grows<br>while <em>you code.</em></h1>
+          <p class="intro__copy">No images. No dependencies. Just a few thousand characters doing their best impression of time. Leave it open while you build something.</p>
+        </section>
+
+        <section class="session" aria-labelledby="sessionLabel">
+          <div class="section-head">
+            <h2 id="sessionLabel">SESSION</h2>
+            <span id="sessionDate">--.--.----</span>
+          </div>
+          <div class="session__clock" id="sessionTime">00:00:00</div>
+          <div class="session__meta">
+            <span class="session__state" id="sessionState">
+              <span class="session__dot" aria-hidden="true"></span>
+              FOCUS
+            </span>
+            <span id="sessionNote">growing in real time</span>
+          </div>
+          <div class="progress" aria-hidden="true">
+            <span class="progress__fill" id="progressFill"></span>
+            <span class="progress__ticks"></span>
+          </div>
+          <div class="progress__labels">
+            <span id="progressStage">SEED</span>
+            <span id="progressNext">SPROUT</span>
+          </div>
+        </section>
+
+        <section class="metrics" aria-label="Tree measurements">
+          <div class="metric">
+            <span class="metric__label">AGE</span>
+            <strong class="metric__value" id="ageMetric">0 days</strong>
+          </div>
+          <div class="metric">
+            <span class="metric__label">HEIGHT</span>
+            <strong class="metric__value" id="heightMetric">0.0 m</strong>
+          </div>
+          <div class="metric">
+            <span class="metric__label">BRANCHES</span>
+            <strong class="metric__value" id="branchMetric">0</strong>
+          </div>
+          <div class="metric">
+            <span class="metric__label">LEAVES</span>
+            <strong class="metric__value" id="leafMetric">0</strong>
+          </div>
+        </section>
+
+        <section class="field-notes" aria-labelledby="notesLabel">
+          <div class="section-head">
+            <h2 id="notesLabel">FIELD NOTES</h2>
+            <span class="section-head__live"><span class="section-head__pulse"></span>LIVE</span>
+          </div>
+          <ol class="notes" id="eventLog" aria-live="polite"></ol>
+        </section>
+
+        <section class="feed" aria-labelledby="feedLabel">
+          <div class="section-head">
+            <h2 id="feedLabel"><span class="feed__prompt">&gt;</span> FEED THE TREE</h2>
+            <span id="keyCount">0 keys</span>
+          </div>
+          <label class="sr-only" for="feedInput">Type to nourish the tree</label>
+          <div class="feed__line">
+            <span aria-hidden="true">&gt;</span>
+            <input id="feedInput" type="text" placeholder="type while you think..." autocomplete="off" autocapitalize="off" spellcheck="false" maxlength="280">
+            <span class="feed__caret" id="feedCaret" aria-hidden="true"></span>
+          </div>
+          <p class="feed__note">Every keystroke adds a little growth. <span>You never have to share your words.</span></p>
+        </section>
+
+        <div class="sidebar__actions">
+          <button class="action" id="pauseButton" type="button" aria-pressed="false">
+            <svg viewBox="0 0 16 16" aria-hidden="true" id="pauseIcon"><path d="M5 3v10M11 3v10"/></svg>
+            <span id="pauseLabel">pause growth</span>
+          </button>
+          <button class="action action--quiet" id="resetButton" type="button">
+            <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8a5 5 0 1 0 1.5-3.6M3 2v4h4"/></svg>
+            <span id="resetLabel">new seed</span>
+          </button>
+        </div>
+
+        <a class="editor-link" href="https://github.com/neverwinter6/coding-plant/tree/main/vscode-extension" target="_blank" rel="noreferrer">
+          <span class="editor-link__tag">VS CODE</span>
+          <span>grow this in your editor</span>
+          <span class="editor-link__arrow" aria-hidden="true">-&gt;</span>
+        </a>
+      </aside>
+    </main>
+
+    <footer class="footer">
+      <span>PERENNIAL <span class="footer__dim">/ 2026</span></span>
+      <span class="footer__note">a small monument to time spent making things</span>
+      <span class="footer__dim">ALL GROWTH IS LOCAL</span>
+    </footer>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite">
+    <span class="toast__mark" aria-hidden="true">+</span>
+    <span id="toastText"></span>
+  </div>
+
+  <noscript>
+    <div class="noscript">This tree needs JavaScript to grow. Please enable it and refresh.</div>
+  </noscript>
+
+  <script type="module" src="./main.js"></script>
+</body>
+</html>

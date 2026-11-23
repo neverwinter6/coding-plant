@@ -1,5 +1,6 @@
 .qa/
 .git/
+vscode-extension/
 server.mjs
 README.md
 LICENSE

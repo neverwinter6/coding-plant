@@ -1,0 +1,50 @@
+{
+  "name": "perennial-vscode",
+  "displayName": "Perennial",
+  "description": "A living ASCII tree fed by your VS Code coding time.",
+  "version": "0.1.0",
+  "publisher": "neverwinter6",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/neverwinter6/coding-plant"
+  },
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "keywords": [
+    "ascii",
+    "tree",
+    "focus",
+    "time",
+    "ambient"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "./extension.js",
+  "icon": "icon.png",
+  "contributes": {
+    "commands": [
+      {
+        "command": "perennial.openTree",
+        "title": "Perennial: Open Tree"
+      },
+      {
+        "command": "perennial.togglePause",
+        "title": "Perennial: Pause or Resume Growth"
+      },
+      {
+        "command": "perennial.newTree",
+        "title": "Perennial: Plant New Seed"
+      }
+    ]
+  },
+  "scripts": {
+    "sync-media": "node scripts/sync-media.mjs",
+    "package": "npx @vscode/vsce package --no-dependencies"
+  }
+}

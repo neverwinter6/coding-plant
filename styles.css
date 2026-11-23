@@ -307,6 +307,16 @@ p {
   box-shadow: none;
 }
 
+.live-chip[data-state="idle"] {
+  color: var(--amber);
+}
+
+.live-chip[data-state="idle"] .live-chip__dot {
+  animation: none;
+  box-shadow: none;
+  opacity: 0.6;
+}
+
 /* ── Main layout ────────────────────────────────────────────── */
 
 .main {
@@ -1088,6 +1098,95 @@ p {
   border-color: var(--line);
   color: var(--muted);
   background: transparent;
+}
+
+.editor-link {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: fit-content;
+  padding: 9px 0 2px;
+  color: var(--muted-deep);
+  font-size: 8px;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  transition: color 180ms ease;
+}
+
+.editor-link:hover {
+  color: var(--green);
+}
+
+.editor-link__tag {
+  padding: 1px 4px;
+  border: 1px solid var(--line);
+  color: var(--green-dim);
+  font-size: 7px;
+  letter-spacing: 0.12em;
+}
+
+.editor-link__arrow {
+  color: var(--muted-deep);
+  transition: color 180ms ease, transform 180ms ease;
+}
+
+.editor-link:hover .editor-link__arrow {
+  color: var(--green);
+  transform: translateX(2px);
+}
+
+/* ── VS Code webview ────────────────────────────────────────── */
+
+body.is-vscode .footer {
+  display: none;
+}
+
+body.is-vscode .shell {
+  padding-right: clamp(12px, 2vw, 24px);
+  padding-left: clamp(12px, 2vw, 24px);
+}
+
+body.is-vscode .topbar {
+  min-height: 64px;
+}
+
+body.is-vscode .main {
+  padding-top: 12px;
+  padding-bottom: 10px;
+}
+
+body.is-vscode .intro {
+  padding-bottom: 14px;
+}
+
+body.is-vscode .intro__copy {
+  display: none;
+}
+
+body.is-vscode .field-notes {
+  min-height: 84px;
+}
+
+body.is-vscode .feed {
+  padding-top: 11px;
+}
+
+body.is-vscode .feed__note {
+  display: none;
+}
+
+body.is-vscode .metric {
+  padding-top: 8px;
+  padding-bottom: 8px;
+}
+
+body.is-vscode .sidebar__actions {
+  padding-top: 9px;
+  padding-bottom: 6px;
+}
+
+body.is-vscode .editor-link {
+  display: none;
 }
 
 /* ── Footer ─────────────────────────────────────────────────── */

@@ -19,6 +19,21 @@ Perennial is a small, dependency-free web experiment: a procedural tree drawn en
 
 No images, no frameworks, no analytics. The tree is drawn character by character on a canvas and echoed as plain text.
 
+## VS Code integration
+
+The [`vscode-extension`](vscode-extension) folder contains a companion extension that connects the tree to actual VS Code time. It tracks focused VS Code time, keeps the tree across editor restarts, shows a status bar clock, and opens the same interface in a webview. The tree still starts as a seed; it just starts the moment you do.
+
+```bash
+cd vscode-extension
+npm run sync-media
+npm run package
+code --install-extension perennial-vscode-0.1.0.vsix
+```
+
+On first install the extension opens the tree automatically. Afterwards, use the **Perennial** status bar item or the **Perennial: Open Tree** command. The webview shows **VS CODE** in the live chip while it is connected.
+
+The browser site continues to work on its own and uses local browser time. The extension is the bridge for real editor time.
+
 ## Run it locally
 
 Requires Node.js 20 or newer.
@@ -39,7 +54,7 @@ Then open [http://127.0.0.1:4173](http://127.0.0.1:4173). There are no dependenc
 | **Copy ASCII** | Copies the current tree and session details to the clipboard |
 | **Save .txt** | Downloads the current tree as plain text |
 
-Session state lives only in your browser under `perennial.session.v2`. Typed text is never stored — only the number of keys offered.
+Session state lives only in your browser under `perennial.session.v2`. Typed text is never stored — only the number of keys offered. In the VS Code extension, session state lives in VS Code's global extension storage instead.
 
 ## How it works
 
