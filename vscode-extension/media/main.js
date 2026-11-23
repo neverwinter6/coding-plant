@@ -1,10 +1,10 @@
 import { buildTree } from "./tree.js";
 
 const TAU = Math.PI * 2;
-const STORAGE_KEY = "perennial.session.v2";
+const STORAGE_KEY = "perennial.session.v3";
 const MAX_STORED_GAP = 6 * 60 * 60 * 1000;
-const GERMINATION_SECONDS = 4;
-const TREE_FULL_AT = 180;
+const GERMINATION_SECONDS = 8;
+const TREE_FULL_AT = 2400;
 const LEAF_BURST_MS = 1500;
 const MONO = '"DM Mono", "Cascadia Mono", Menlo, Consolas, monospace';
 
@@ -16,37 +16,37 @@ const STAGES = [
     caption: "The seed is listening for a reason to begin.",
   },
   {
-    at: 6,
+    at: 10,
     name: "SPROUT",
     label: "SPROUT",
     caption: "A small fracture of green, looking for the sun.",
   },
   {
-    at: 16,
+    at: 180,
     name: "SAPLING",
     label: "SAPLING",
     caption: "It has decided that up is worth the effort.",
   },
   {
-    at: 35,
+    at: 600,
     name: "YOUNG TREE",
     label: "YOUNG TREE",
     caption: "Branches negotiate their share of the sky.",
   },
   {
-    at: 65,
+    at: 1200,
     name: "CANOPY",
     label: "CANOPY",
     caption: "A private climate is assembling overhead.",
   },
   {
-    at: 140,
+    at: 2400,
     name: "OLD GROWTH",
     label: "OLD GROWTH",
     caption: "What started as syntax is now a silhouette.",
   },
   {
-    at: 260,
+    at: 3600,
     name: "ANCIENT",
     label: "ANCIENT",
     caption: "Still adding to itself, one character at a time.",
@@ -55,15 +55,15 @@ const STAGES = [
 
 const FIELD_NOTES = [
   { at: 0, text: "a seed is tucked into the dark." },
-  { at: 2.4, text: "a first root finds the bottom of the world." },
-  { at: 6.5, text: "something green breaks the surface." },
-  { at: 16, text: "the first true leaves open." },
-  { at: 31, text: "the trunk commits to a direction." },
-  { at: 55, text: "branches begin to share the light." },
-  { at: 96, text: "the canopy closes over the session." },
-  { at: 158, text: "one more ring, laid down in silence." },
-  { at: 262, text: "old growth. still adding to itself." },
-  { at: 480, text: "a small forest of decisions." },
+  { at: 4, text: "a first root finds the bottom of the world." },
+  { at: 24, text: "something green breaks the surface." },
+  { at: 240, text: "the first true leaves open." },
+  { at: 600, text: "the trunk commits to a direction." },
+  { at: 1200, text: "branches begin to share the light." },
+  { at: 2400, text: "the canopy closes over the session." },
+  { at: 3600, text: "one more ring, laid down in silence." },
+  { at: 5400, text: "old growth. still adding to itself." },
+  { at: 7200, text: "a small forest of decisions." },
 ];
 
 const P = {
@@ -418,7 +418,7 @@ function growthClock() {
   const seconds = state.growthMs / 1000;
   const activeSeconds = Math.max(0, seconds - GERMINATION_SECONDS);
   const normalized =
-    (1 - Math.exp(-activeSeconds / 22)) / (1 - Math.exp(-TREE_FULL_AT / 22));
+    (1 - Math.exp(-activeSeconds / 720)) / (1 - Math.exp(-TREE_FULL_AT / 720));
   const clamped = clamp(normalized, 0, 1);
   const late = Math.max(0, activeSeconds - TREE_FULL_AT) * 0.7;
   return {
@@ -549,7 +549,8 @@ function draw(now) {
   updateCamera(visible);
 
   clearGrid();
-  drawSoil(growth.clock);
+  const seeding = state.elapsedMs < (GERMINATION_SECONDS + 1.5) * 1000;
+  drawSoil(growth.clock, seeding);
   drawBranches(growth.clock, now);
   drawLeaves(growth.clock, now);
   drawCanopyFill(growth.clock);
@@ -557,7 +558,7 @@ function draw(now) {
 
   ctx.setTransform(render.dpr, 0, 0, render.dpr, 0, 0);
   ctx.clearRect(0, 0, render.W, render.H);
-  drawGerminationGlow(ctx, growth.clock, now);
+  drawGerminationGlow(ctx, now, seeding);
   drawSpecks(ctx, now);
   paintGrid(ctx);
   drawParticles(ctx, now);
@@ -941,7 +942,7 @@ function drawBlossoms(clock, now) {
   }
 }
 
-function drawSoil(clock) {
+function drawSoil(clock, seeding) {
   const baseRow = Math.floor(
     (camera.baseY - render.offsetY) / render.lineH
   );
@@ -992,7 +993,7 @@ function drawSoil(clock) {
     }
   }
 
-  if (clock < 2.8) {
+  if (seeding) {
     // A seed, drawn as a small lit pod above the soil line.
     setCell(centerCol - 1, baseRow - 3, ".", P.trunk, 7);
     setCell(centerCol, baseRow - 3, "-", P.trunk, 7);
@@ -1007,8 +1008,8 @@ function drawSoil(clock) {
   }
 }
 
-function drawGerminationGlow(ctx, clock, now) {
-  if (clock > 2.8) return;
+function drawGerminationGlow(ctx, now, seeding) {
+  if (!seeding) return;
   const ground = project(0, 0);
   const x = ground.px;
   const y = ground.py - render.lineH * 1.7;

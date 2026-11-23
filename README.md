@@ -54,7 +54,9 @@ Then open [http://127.0.0.1:4173](http://127.0.0.1:4173). There are no dependenc
 | **Copy ASCII** | Copies the current tree and session details to the clipboard |
 | **Save .txt** | Downloads the current tree as plain text |
 
-Session state lives only in your browser under `perennial.session.v2`. Typed text is never stored — only the number of keys offered. In the VS Code extension, session state lives in VS Code's global extension storage instead.
+Session state lives only in your browser under `perennial.session.v3`. Typed text is never stored — only the number of keys offered. In the VS Code extension, session state lives in VS Code's global extension storage instead.
+
+Perennial is deliberately slow. The seed stage lasts about ten seconds; the first true leaves usually arrive after a few minutes; a full canopy takes roughly forty minutes of focused time. The tree is designed to be left open for a whole work session, not watched for a minute.
 
 ## How it works
 

@@ -26,6 +26,8 @@ The extension tracks focused VS Code time, keeps the same deterministic tree bet
 
 Time accumulates while the VS Code window is focused. When VS Code loses focus, the clock stops. The status bar shows the current session time and whether the tree is paused or idle.
 
+The pacing is intentionally slow: a seed for about ten seconds, first leaves after a few minutes, and a full canopy after roughly forty minutes of focused time. Leave it open across a work session.
+
 Typing in the tree's **Feed the tree** field still adds a little extra growth.
 
 ## Development
