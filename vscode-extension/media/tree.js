@@ -61,8 +61,8 @@ export function buildTree(seed) {
   function addLeaf(x, y, born, options = {}) {
     const glyph =
       options.glyph ||
-      (rand() < 0.3
-        ? pick(["&", "&", "*", "o", "*"])
+      (rand() < 0.5
+        ? pick(["&", "&", "&", "*", "*", "o"])
         : pick(["'", "'", ".", ",", "`", "'", "."]));
     leaves.push({
       x,
@@ -274,7 +274,7 @@ export function buildTree(seed) {
 
   // Branches are placed along the trunk. Lower limbs reach farther out;
   // upper limbs stay steeper and shorter.
-  const levels = [0.23, 0.34, 0.45, 0.55, 0.64, 0.73, 0.81, 0.88, 0.93];
+  const levels = [0.28, 0.4, 0.52, 0.63, 0.73, 0.82, 0.9];
   let side = rand() < 0.5 ? -1 : 1;
 
   for (let index = 0; index < levels.length; index += 1) {
@@ -287,7 +287,7 @@ export function buildTree(seed) {
     const length = 0.46 * profile * (0.82 + rand() * 0.32);
     const angle =
       UP +
-      mainSide * (1.2 - height * 0.38 + (rand() - 0.5) * 0.18);
+      mainSide * (1.02 - height * 0.36 + (rand() - 0.5) * 0.18);
     const start = trunkStart + trunkDuration * height * 0.94 + 0.25 + rand() * 0.9;
     const duration = 3.4 + length * 2.5 + rand() * 1.5;
 
@@ -310,7 +310,7 @@ export function buildTree(seed) {
     }
 
     // Add a shorter counterweight limb on the other side sometimes.
-    if (height > 0.27 && height < 0.84 && rand() < 0.62) {
+    if (height > 0.27 && height < 0.84 && rand() < 0.45) {
       const secondLength = length * (0.58 + rand() * 0.22);
       const secondStart = start + 0.3 + rand() * 1.3;
       const second = createBranch({
@@ -318,7 +318,7 @@ export function buildTree(seed) {
         y: origin.y,
         angle:
           UP -
-          mainSide * (0.94 - height * 0.24 + (rand() - 0.5) * 0.2),
+          mainSide * (0.78 - height * 0.22 + (rand() - 0.5) * 0.2),
         length: secondLength,
         width: 1.5,
         depth: 1,

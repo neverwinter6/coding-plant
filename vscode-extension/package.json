@@ -1,8 +1,8 @@
 {
   "name": "perennial-vscode",
   "displayName": "Perennial",
-  "description": "A living ASCII tree fed by your VS Code coding time.",
-  "version": "0.1.0",
+  "description": "A living ASCII tree fed by your focused VS Code time.",
+  "version": "0.2.0",
   "publisher": "neverwinter6",
   "license": "MIT",
   "repository": {

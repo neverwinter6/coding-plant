@@ -8,11 +8,11 @@ The extension tracks focused VS Code time, keeps the same deterministic tree bet
 
 - Install the packaged extension:
   ```bash
-  code --install-extension perennial-vscode-0.1.0.vsix
+  code --install-extension perennial-vscode-0.2.0.vsix
   ```
 - Reload VS Code if prompted.
 - The tree opens automatically the first time. After that, click the **Perennial** status bar item or run **Perennial: Open Tree** from the Command Palette.
-- The tree page's own controls work in the webview: pause/resume, plant a new seed, copy ASCII, and save the current tree as text.
+- The tree page's own controls work in the webview: pause/resume, plant a new seed, focus mode, copy ASCII, and save the current tree as text.
 
 ## Commands
 
@@ -26,7 +26,7 @@ The extension tracks focused VS Code time, keeps the same deterministic tree bet
 
 Time accumulates while the VS Code window is focused. When VS Code loses focus, the clock stops. The status bar shows the current session time and whether the tree is paused or idle.
 
-The pacing is intentionally slow: a seed for about ten seconds, first leaves after a few minutes, and a full canopy after roughly forty minutes of focused time. Leave it open across a work session.
+The pacing is intentionally slow: a seed for about twenty seconds, first leaves after roughly ten minutes, and a full canopy after about eight hours of focused time. Leave the tree open across a workday. The interface follows your local dawn, day, dusk, and night; focus mode hides the surrounding UI when you want just the tree.
 
 Typing in the tree's **Feed the tree** field still adds a little extra growth.
 

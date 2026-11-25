@@ -58,7 +58,7 @@
 
       <div class="topbar__meta">
         <div class="clock">
-          <span class="micro-label">LOCAL TIME</span>
+          <span class="micro-label"><span id="skyPhase">NIGHT</span> / LOCAL TIME</span>
           <time id="localClock" datetime="">--:--:--</time>
         </div>
         <div class="live-chip" id="liveChip">
@@ -81,6 +81,10 @@
           <div class="specimen__bar-right">
             <span class="mode"><span class="mode__bracket">[</span> ASCII <span class="mode__bracket">]</span></span>
             <span class="specimen__seed">SEED <b id="seedShort">0000</b></span>
+            <button class="bar-button" id="zenButton" type="button" aria-label="Enter focus mode" aria-pressed="false" title="Focus mode (F)">
+              <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6 2H2v4M10 2h4v4M6 14H2v-4M10 14h4v-4"/></svg>
+              <span>focus</span>
+            </button>
           </div>
         </div>
 
@@ -142,7 +146,7 @@
         <section class="intro">
           <p class="eyebrow"><span class="eyebrow__num">01</span> A LIVING INTERFACE</p>
           <h1>A tree that grows<br>while <em>you code.</em></h1>
-          <p class="intro__copy">No images. No dependencies. Just a few thousand characters doing their best impression of time. A full canopy takes about forty minutes of focused time.</p>
+          <p class="intro__copy">No images. No dependencies. Just a few thousand characters doing their best impression of time. A full canopy takes about eight hours of focused time — leave it open across the day.</p>
         </section>
 
         <section class="session" aria-labelledby="sessionLabel">
@@ -164,6 +168,7 @@
           </div>
           <div class="progress__labels">
             <span id="progressStage">SEED</span>
+            <span class="progress__eta" id="progressEta">in 20s</span>
             <span id="progressNext">SPROUT</span>
           </div>
         </section>
@@ -187,6 +192,12 @@
           </div>
         </section>
 
+        <div class="ledger" aria-label="Long-term growth">
+          <span class="ledger__item"><span class="ledger__label">RINGS</span><b id="ringMetric">01</b></span>
+          <span class="ledger__item"><span class="ledger__label">TENDED</span><b id="tendedMetric">0m</b></span>
+          <span class="ledger__item ledger__item--right"><span class="ledger__label">PACE</span><b>SLOW</b></span>
+        </div>
+
         <section class="field-notes" aria-labelledby="notesLabel">
           <div class="section-head">
             <h2 id="notesLabel">FIELD NOTES</h2>
@@ -206,7 +217,7 @@
             <input id="feedInput" type="text" placeholder="type while you think..." autocomplete="off" autocapitalize="off" spellcheck="false" maxlength="280">
             <span class="feed__caret" id="feedCaret" aria-hidden="true"></span>
           </div>
-          <p class="feed__note">Every keystroke adds a little growth. <span>You never have to share your words.</span></p>
+          <p class="feed__note">Every keystroke adds a little growth. <span>F opens focus mode.</span></p>
         </section>
 
         <div class="sidebar__actions">
@@ -239,6 +250,11 @@
     <span class="toast__mark" aria-hidden="true">+</span>
     <span id="toastText"></span>
   </div>
+
+  <button class="zen-exit" id="zenExit" type="button" aria-label="Exit focus mode">
+    <span class="zen-exit__key">ESC</span>
+    exit focus
+  </button>
 
   <noscript>
     <div class="noscript">This tree needs JavaScript to grow. Please enable it and refresh.</div>

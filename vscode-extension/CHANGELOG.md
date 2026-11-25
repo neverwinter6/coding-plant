@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.0
+
+- Slow the growth curve to an eight-hour canopy, with a seed-first start.
+- Bring the day/night palettes, milestone ETA, rings ledger, and focus mode into the webview.
+- Keep shared multi-window state on disk so several VS Code windows do not overwrite one another.
+
 ## 0.1.0
 
 - Initial VS Code companion.

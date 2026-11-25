@@ -15,12 +15,117 @@
   --bg: #07100b;
   --bg-raised: #0a140e;
   --bg-deep: #050b07;
+  --sky-top: #08120c;
+  --sky-mid: #060d09;
+  --sky-bottom: #080f0a;
+  --sky-glow-top: rgba(86, 123, 69, 0.16);
+  --sky-glow-one: rgba(104, 145, 76, 0.2);
+  --sky-glow-two: rgba(211, 165, 96, 0.1);
+  --stage-top: #08120d;
+  --stage-bottom: #09130d;
+  --stage-wash: rgba(110, 148, 82, 0.1);
   --line: rgba(206, 232, 190, 0.13);
   --line-strong: rgba(206, 232, 190, 0.23);
   --line-faint: rgba(206, 232, 190, 0.07);
   --mono: "DM Mono", "Cascadia Mono", "SFMono-Regular", Menlo, Consolas, monospace;
   --serif: "Instrument Serif", "Iowan Old Style", "Palatino Linotype", Georgia, serif;
   --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+body[data-sky="dawn"] {
+  --ink: #f3f1dd;
+  --ink-soft: #d7d5b7;
+  --muted: #8e957c;
+  --muted-deep: #646b56;
+  --green: #dce8a1;
+  --green-bright: #f4ffc2;
+  --green-dim: #9caf76;
+  --amber: #ffd18d;
+  --amber-bright: #ffe8be;
+  --sky-top: #0e120a;
+  --sky-mid: #080e09;
+  --sky-bottom: #0a100b;
+  --sky-glow-top: rgba(177, 142, 78, 0.18);
+  --sky-glow-one: rgba(153, 158, 87, 0.18);
+  --sky-glow-two: rgba(220, 167, 98, 0.15);
+  --stage-top: #0c130c;
+  --stage-bottom: #09110b;
+  --stage-wash: rgba(160, 160, 82, 0.1);
+  --line: rgba(232, 230, 190, 0.13);
+  --line-strong: rgba(232, 230, 190, 0.22);
+  --line-faint: rgba(232, 230, 190, 0.06);
+}
+
+body[data-sky="day"] {
+  --ink: #eef2df;
+  --ink-soft: #c6cdb8;
+  --muted: #7e8e7b;
+  --muted-deep: #536456;
+  --green: #c9ef8a;
+  --green-bright: #e2ffa8;
+  --green-dim: #86ac68;
+  --amber: #e8bd7a;
+  --amber-bright: #ffd99a;
+  --sky-top: #08140d;
+  --sky-mid: #060d09;
+  --sky-bottom: #080f0a;
+  --sky-glow-top: rgba(102, 143, 74, 0.2);
+  --sky-glow-one: rgba(104, 145, 76, 0.2);
+  --sky-glow-two: rgba(211, 165, 96, 0.1);
+  --stage-top: #08130d;
+  --stage-bottom: #09130d;
+  --stage-wash: rgba(110, 148, 82, 0.1);
+  --line: rgba(206, 232, 190, 0.13);
+  --line-strong: rgba(206, 232, 190, 0.23);
+  --line-faint: rgba(206, 232, 190, 0.07);
+}
+
+body[data-sky="dusk"] {
+  --ink: #f1e7d2;
+  --ink-soft: #d3c7b0;
+  --muted: #948a77;
+  --muted-deep: #675f50;
+  --green: #d6de95;
+  --green-bright: #f0eab0;
+  --green-dim: #9c9d6d;
+  --amber: #ffc48b;
+  --amber-bright: #ffddb1;
+  --sky-top: #0e0f0a;
+  --sky-mid: #0a0b08;
+  --sky-bottom: #0d0b09;
+  --sky-glow-top: rgba(171, 115, 70, 0.18);
+  --sky-glow-one: rgba(147, 124, 78, 0.17);
+  --sky-glow-two: rgba(196, 126, 77, 0.12);
+  --stage-top: #0d110b;
+  --stage-bottom: #0e0c09;
+  --stage-wash: rgba(176, 130, 79, 0.1);
+  --line: rgba(235, 219, 191, 0.12);
+  --line-strong: rgba(235, 219, 191, 0.21);
+  --line-faint: rgba(235, 219, 191, 0.06);
+}
+
+body[data-sky="night"] {
+  --ink: #e9efe4;
+  --ink-soft: #c5d2c4;
+  --muted: #7f9186;
+  --muted-deep: #52665c;
+  --green: #b8eacb;
+  --green-bright: #d9ffe4;
+  --green-dim: #75a88b;
+  --amber: #f2cf9c;
+  --amber-bright: #ffe5b8;
+  --sky-top: #050c0b;
+  --sky-mid: #050b0a;
+  --sky-bottom: #070e0c;
+  --sky-glow-top: rgba(64, 94, 88, 0.18);
+  --sky-glow-one: rgba(76, 126, 111, 0.16);
+  --sky-glow-two: rgba(147, 119, 76, 0.08);
+  --stage-top: #07100f;
+  --stage-bottom: #08120f;
+  --stage-wash: rgba(78, 130, 113, 0.09);
+  --line: rgba(200, 232, 211, 0.11);
+  --line-strong: rgba(200, 232, 211, 0.2);
+  --line-faint: rgba(200, 232, 211, 0.055);
 }
 
 * {
@@ -37,8 +142,8 @@ body {
   margin: 0;
   min-height: 100svh;
   background:
-    radial-gradient(ellipse 100% 70% at 50% -10%, rgba(86, 123, 69, 0.16), transparent 60%),
-    linear-gradient(160deg, #08120c 0%, #060d09 58%, #080f0a 100%);
+    radial-gradient(ellipse 100% 70% at 50% -10%, var(--sky-glow-top), transparent 60%),
+    linear-gradient(160deg, var(--sky-top) 0%, var(--sky-mid) 58%, var(--sky-bottom) 100%);
   color: var(--ink);
   font-family: var(--mono);
   font-size: 13px;
@@ -103,7 +208,7 @@ p {
   height: 50vw;
   left: 22%;
   top: 28%;
-  background: rgba(104, 145, 76, 0.2);
+  background: var(--sky-glow-one);
 }
 
 .atmosphere__glow--two {
@@ -111,7 +216,7 @@ p {
   height: 30vw;
   right: -10%;
   bottom: -15%;
-  background: rgba(211, 165, 96, 0.1);
+  background: var(--sky-glow-two);
 }
 
 .atmosphere__grain,
@@ -422,14 +527,57 @@ p {
   font-weight: 400;
 }
 
+.bar-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  min-width: 21px;
+  height: 21px;
+  padding: 0 4px;
+  border: 1px solid transparent;
+  background: none;
+  color: var(--muted-deep);
+  font-family: var(--mono);
+  font-size: 7px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: color 180ms ease, border-color 180ms ease;
+}
+
+.bar-button span {
+  display: none;
+}
+
+.bar-button svg {
+  width: 11px;
+  height: 11px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.1;
+  stroke-linecap: square;
+}
+
+.bar-button:hover {
+  color: var(--green);
+  border-color: var(--line);
+}
+
+@media (min-width: 1180px) {
+  .bar-button span {
+    display: inline;
+  }
+}
+
 .stage {
   position: relative;
   flex: 1;
   min-height: 0;
   overflow: hidden;
   background:
-    radial-gradient(ellipse 75% 65% at 50% 46%, rgba(110, 148, 82, 0.1), transparent 67%),
-    linear-gradient(180deg, #08120d 0%, #07100b 66%, #09130d 100%);
+    radial-gradient(ellipse 75% 65% at 50% 46%, var(--stage-wash), transparent 67%),
+    linear-gradient(180deg, var(--stage-top) 0%, #07100b 66%, var(--stage-bottom) 100%);
 }
 
 .stage::before {
@@ -838,6 +986,7 @@ p {
 .progress__labels {
   display: flex;
   justify-content: space-between;
+  gap: 8px;
   margin-top: 6px;
   color: var(--muted-deep);
   font-size: 7px;
@@ -847,6 +996,13 @@ p {
 
 .progress__labels span:last-child {
   color: var(--muted);
+  text-align: right;
+}
+
+.progress__eta {
+  color: var(--green-dim);
+  opacity: 0.78;
+  white-space: nowrap;
 }
 
 .metrics {
@@ -872,6 +1028,47 @@ p {
 
 .metric:nth-child(-n + 2) {
   border-bottom: 1px solid var(--line-faint);
+}
+
+.ledger {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--line);
+  color: var(--muted-deep);
+  font-size: 7px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.ledger__item {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.ledger__item--right {
+  margin-left: auto;
+}
+
+.ledger__label {
+  color: var(--muted-deep);
+}
+
+.ledger b {
+  color: var(--ink-soft);
+  font-size: 9px;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  font-variant-numeric: tabular-nums;
+}
+
+.ledger__item--right b {
+  color: var(--green-dim);
+  font-size: 8px;
+  letter-spacing: 0.12em;
 }
 
 .metric__label {
@@ -1186,6 +1383,80 @@ body.is-vscode .sidebar__actions {
 }
 
 body.is-vscode .editor-link {
+  display: none;
+}
+
+/* ── Zen / focus mode ───────────────────────────────────────── */
+
+.zen-exit {
+  position: fixed;
+  z-index: 40;
+  top: 18px;
+  right: 18px;
+  display: none;
+  align-items: center;
+  gap: 8px;
+  height: 29px;
+  padding: 0 10px;
+  border: 1px solid var(--line-strong);
+  background: rgba(7, 16, 11, 0.72);
+  color: var(--muted);
+  font-size: 8px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+}
+
+.zen-exit__key {
+  padding: 1px 4px;
+  border: 1px solid var(--line);
+  color: var(--green-dim);
+  font-size: 7px;
+  letter-spacing: 0.1em;
+}
+
+.zen-exit:hover {
+  color: var(--green);
+  border-color: var(--green-dim);
+}
+
+body.is-zen {
+  overflow: hidden;
+}
+
+body.is-zen .topbar,
+body.is-zen .sidebar,
+body.is-zen .footer,
+body.is-zen .specimen__bar,
+body.is-zen .specimen__foot {
+  display: none;
+}
+
+body.is-zen .zen-exit {
+  display: inline-flex;
+}
+
+body.is-zen .shell {
+  width: 100%;
+  max-width: none;
+  padding: 0;
+}
+
+body.is-zen .main {
+  display: block;
+  height: 100svh;
+  padding: 0;
+}
+
+body.is-zen .specimen {
+  height: 100svh;
+  min-height: 100svh;
+  border: 0;
+}
+
+body.is-zen .specimen::before,
+body.is-zen .specimen::after {
   display: none;
 }
 

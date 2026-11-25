@@ -1,10 +1,11 @@
 import { buildTree } from "./tree.js";
 
 const TAU = Math.PI * 2;
-const STORAGE_KEY = "perennial.session.v3";
+const STORAGE_KEY = "perennial.session.v4";
 const MAX_STORED_GAP = 6 * 60 * 60 * 1000;
-const GERMINATION_SECONDS = 8;
-const TREE_FULL_AT = 2400;
+const GERMINATION_SECONDS = 12;
+const TREE_FULL_AT = 8 * 60 * 60;
+const GROWTH_CURVE = 120;
 const LEAF_BURST_MS = 1500;
 const MONO = '"DM Mono", "Cascadia Mono", Menlo, Consolas, monospace';
 
@@ -16,37 +17,37 @@ const STAGES = [
     caption: "The seed is listening for a reason to begin.",
   },
   {
-    at: 10,
+    at: 20,
     name: "SPROUT",
     label: "SPROUT",
     caption: "A small fracture of green, looking for the sun.",
   },
   {
-    at: 180,
+    at: 600,
     name: "SAPLING",
     label: "SAPLING",
     caption: "It has decided that up is worth the effort.",
   },
   {
-    at: 600,
+    at: 3600,
     name: "YOUNG TREE",
     label: "YOUNG TREE",
     caption: "Branches negotiate their share of the sky.",
   },
   {
-    at: 1200,
+    at: 7200,
     name: "CANOPY",
     label: "CANOPY",
     caption: "A private climate is assembling overhead.",
   },
   {
-    at: 2400,
+    at: 28800,
     name: "OLD GROWTH",
     label: "OLD GROWTH",
     caption: "What started as syntax is now a silhouette.",
   },
   {
-    at: 3600,
+    at: 86400,
     name: "ANCIENT",
     label: "ANCIENT",
     caption: "Still adding to itself, one character at a time.",
@@ -55,15 +56,15 @@ const STAGES = [
 
 const FIELD_NOTES = [
   { at: 0, text: "a seed is tucked into the dark." },
-  { at: 4, text: "a first root finds the bottom of the world." },
-  { at: 24, text: "something green breaks the surface." },
-  { at: 240, text: "the first true leaves open." },
-  { at: 600, text: "the trunk commits to a direction." },
-  { at: 1200, text: "branches begin to share the light." },
-  { at: 2400, text: "the canopy closes over the session." },
-  { at: 3600, text: "one more ring, laid down in silence." },
-  { at: 5400, text: "old growth. still adding to itself." },
-  { at: 7200, text: "a small forest of decisions." },
+  { at: 8, text: "a first root finds the bottom of the world." },
+  { at: 30, text: "something green breaks the surface." },
+  { at: 600, text: "the first true leaves open." },
+  { at: 1800, text: "the trunk commits to a direction." },
+  { at: 7200, text: "branches begin to share the light." },
+  { at: 28800, text: "the canopy closes over the session." },
+  { at: 43200, text: "one more ring, laid down in silence." },
+  { at: 86400, text: "old growth. still adding to itself." },
+  { at: 172800, text: "a small forest of decisions." },
 ];
 
 const P = {
@@ -82,22 +83,99 @@ const P = {
   speck: 13,
 };
 
-const PALETTE = [
-  "transparent",
-  "rgba(190, 171, 126, 0.96)",
-  "rgba(100, 127, 88, 0.72)",
-  "rgba(85, 114, 78, 0.64)",
-  "rgba(74, 100, 69, 0.54)",
-  "rgba(208, 247, 143, 0.98)",
-  "rgba(168, 214, 116, 0.95)",
-  "rgba(126, 175, 102, 0.9)",
-  "rgba(238, 255, 188, 1)",
-  "rgba(247, 197, 122, 0.99)",
-  "rgba(224, 160, 90, 0.97)",
-  "rgba(129, 150, 120, 0.58)",
-  "rgba(105, 128, 98, 0.42)",
-  "rgba(193, 230, 159, 0.22)",
-];
+const SKIES = {
+  dawn: {
+    label: "DAWN",
+    theme: "#0e120a",
+    speckAlpha: 0.46,
+    fireflies: false,
+    palette: [
+      "transparent",
+      "rgba(222, 190, 139, 0.97)",
+      "rgba(155, 158, 105, 0.82)",
+      "rgba(124, 139, 94, 0.74)",
+      "rgba(99, 119, 84, 0.64)",
+      "rgba(236, 244, 157, 0.99)",
+      "rgba(192, 220, 131, 0.95)",
+      "rgba(143, 181, 111, 0.92)",
+      "rgba(255, 247, 190, 1)",
+      "rgba(255, 208, 144, 0.99)",
+      "rgba(226, 170, 103, 0.97)",
+      "rgba(131, 148, 116, 0.58)",
+      "rgba(108, 126, 96, 0.42)",
+      "rgba(216, 230, 177, 0.26)",
+    ],
+  },
+  day: {
+    label: "DAY",
+    theme: "#08140d",
+    speckAlpha: 0.32,
+    fireflies: false,
+    palette: [
+      "transparent",
+      "rgba(190, 171, 126, 0.96)",
+      "rgba(100, 127, 88, 0.72)",
+      "rgba(85, 114, 78, 0.64)",
+      "rgba(74, 100, 69, 0.54)",
+      "rgba(208, 247, 143, 0.98)",
+      "rgba(168, 214, 116, 0.95)",
+      "rgba(126, 175, 102, 0.9)",
+      "rgba(238, 255, 188, 1)",
+      "rgba(247, 197, 122, 0.99)",
+      "rgba(224, 160, 90, 0.97)",
+      "rgba(129, 150, 120, 0.58)",
+      "rgba(105, 128, 98, 0.42)",
+      "rgba(193, 230, 159, 0.22)",
+    ],
+  },
+  dusk: {
+    label: "DUSK",
+    theme: "#0e0f0a",
+    speckAlpha: 0.5,
+    fireflies: true,
+    palette: [
+      "transparent",
+      "rgba(219, 177, 133, 0.97)",
+      "rgba(153, 136, 94, 0.82)",
+      "rgba(122, 118, 84, 0.74)",
+      "rgba(97, 101, 75, 0.64)",
+      "rgba(227, 221, 130, 0.98)",
+      "rgba(191, 195, 114, 0.95)",
+      "rgba(145, 161, 101, 0.9)",
+      "rgba(255, 226, 155, 1)",
+      "rgba(255, 183, 112, 0.99)",
+      "rgba(229, 157, 92, 0.97)",
+      "rgba(139, 137, 112, 0.58)",
+      "rgba(110, 113, 94, 0.42)",
+      "rgba(230, 205, 163, 0.28)",
+    ],
+  },
+  night: {
+    label: "NIGHT",
+    theme: "#050c0b",
+    speckAlpha: 1,
+    fireflies: true,
+    palette: [
+      "transparent",
+      "rgba(155, 177, 146, 0.92)",
+      "rgba(83, 114, 89, 0.72)",
+      "rgba(68, 98, 79, 0.66)",
+      "rgba(58, 84, 71, 0.55)",
+      "rgba(180, 233, 172, 0.94)",
+      "rgba(132, 200, 158, 0.91)",
+      "rgba(92, 154, 128, 0.86)",
+      "rgba(225, 255, 212, 1)",
+      "rgba(255, 223, 155, 0.98)",
+      "rgba(230, 173, 107, 0.95)",
+      "rgba(111, 132, 117, 0.58)",
+      "rgba(88, 111, 99, 0.42)",
+      "rgba(206, 238, 201, 0.3)",
+    ],
+  },
+};
+
+let skyName = "day";
+let PALETTE = SKIES.day.palette;
 
 const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 const VSCODE_MODE = typeof acquireVsCodeApi === "function";
@@ -122,6 +200,7 @@ let lastNoteKey = "";
 let lastStageIndex = -1;
 let lastTypedAt = 0;
 let firstPausedTyping = false;
+let isZen = false;
 
 const uiCache = new Map();
 const particles = [];
@@ -170,11 +249,13 @@ function init() {
     visible: null,
     frame: 0,
     glyphs: 0,
+    ambientLeaves: 0,
     ready: false,
   };
 
   bindEvents();
   updateStaticLabels();
+  updateSky(true);
   resizeCanvas();
   updateLocalClock();
   updateUI(true);
@@ -208,6 +289,7 @@ function cacheElements() {
     "fileName",
     "seedShort",
     "localClock",
+    "skyPhase",
     "liveChip",
     "liveChipText",
     "growthStatus",
@@ -221,7 +303,10 @@ function cacheElements() {
     "sessionNote",
     "progressFill",
     "progressStage",
+    "progressEta",
     "progressNext",
+    "ringMetric",
+    "tendedMetric",
     "ageMetric",
     "heightMetric",
     "branchMetric",
@@ -237,6 +322,8 @@ function cacheElements() {
     "resetLabel",
     "copyButton",
     "exportButton",
+    "zenButton",
+    "zenExit",
     "toast",
     "toastText",
     "session",
@@ -256,6 +343,8 @@ function bindEvents() {
   els.copyButton.addEventListener("click", copyAscii);
   els.exportButton.addEventListener("click", exportAscii);
   els.stageHint.addEventListener("click", () => els.feedInput.focus());
+  els.zenButton.addEventListener("click", toggleZen);
+  els.zenExit.addEventListener("click", () => setZen(false));
 
   window.addEventListener("resize", resizeCanvas);
   window.addEventListener("pagehide", saveState);
@@ -265,6 +354,25 @@ function bindEvents() {
     } else {
       lastWall = Date.now();
       updateLocalClock();
+    }
+  });
+  document.addEventListener("keydown", (event) => {
+    if (
+      event.metaKey ||
+      event.ctrlKey ||
+      event.altKey ||
+      event.target.matches("input, textarea, select, [contenteditable='true']")
+    ) {
+      return;
+    }
+    if (event.key === "Escape" && isZen) {
+      event.preventDefault();
+      setZen(false);
+      return;
+    }
+    if (event.key.toLowerCase() === "f") {
+      event.preventDefault();
+      toggleZen();
     }
   });
 
@@ -418,7 +526,8 @@ function growthClock() {
   const seconds = state.growthMs / 1000;
   const activeSeconds = Math.max(0, seconds - GERMINATION_SECONDS);
   const normalized =
-    (1 - Math.exp(-activeSeconds / 720)) / (1 - Math.exp(-TREE_FULL_AT / 720));
+    Math.log1p(activeSeconds / GROWTH_CURVE) /
+    Math.log1p(TREE_FULL_AT / GROWTH_CURVE);
   const clamped = clamp(normalized, 0, 1);
   const late = Math.max(0, activeSeconds - TREE_FULL_AT) * 0.7;
   return {
@@ -549,9 +658,11 @@ function draw(now) {
   updateCamera(visible);
 
   clearGrid();
-  const seeding = state.elapsedMs < (GERMINATION_SECONDS + 1.5) * 1000;
+  const seeding = state.elapsedMs < (GERMINATION_SECONDS + 8) * 1000;
   drawSoil(growth.clock, seeding);
   drawBranches(growth.clock, now);
+  drawAmbientCrown(growth.clock, now);
+  drawEarlyLeaves(growth.clock, now);
   drawLeaves(growth.clock, now);
   drawCanopyFill(growth.clock);
   drawBlossoms(growth.clock, now);
@@ -561,6 +672,7 @@ function draw(now) {
   drawGerminationGlow(ctx, now, seeding);
   drawSpecks(ctx, now);
   paintGrid(ctx);
+  drawFireflies(ctx, now);
   drawParticles(ctx, now);
 
   render.frame += 1;
@@ -686,12 +798,11 @@ function drawBranches(clock, now) {
 
     let color;
     if (branch.depth === 0) color = P.trunk;
-    else if (branch.depth === 1) color = P.wood;
-    else if (branch.depth < 5) color = P.branch;
+    else if (branch.depth === 1) color = P.branch;
     else color = P.twig;
 
-    if (branch.depth > 0 && branch.depth < 5 && clock < branch.end + 1.1) {
-      color = branch.depth < 5 ? P.wood : P.branch;
+    if (branch.depth === 1 && clock < branch.end + 1.1) {
+      color = P.wood;
     }
 
     const priority = branch.depth === 0 ? 9 : 5;
@@ -782,6 +893,168 @@ function rasterLine(a, b, color, priority) {
     if (doubled < adc) {
       error += adc;
       row += stepR;
+    }
+  }
+}
+
+function drawEarlyLeaves(clock, now) {
+  if (clock <= 0.2 || clock > 18) return;
+  const trunk = tree.branches[0];
+  if (!trunk) return;
+
+  const progress = clamp((clock - trunk.start) / trunk.duration, 0, 1);
+  if (progress <= 0) return;
+
+  const points = trunk.points;
+  const exact = progress * (points.length - 1);
+  const index = Math.floor(exact);
+  const next = Math.min(points.length - 1, index + 1);
+  const amount = exact - index;
+  const tip = {
+    x: points[index].x + (points[next].x - points[index].x) * amount,
+    y: points[index].y + (points[next].y - points[index].y) * amount,
+  };
+  const projected = project(tip.x, tip.y, branchSway(trunk, tip, now));
+  const col = Math.floor(
+    projected.px / render.charW - render.offsetX / render.charW
+  );
+  const row = Math.floor(
+    projected.py / render.lineH - render.offsetY / render.lineH
+  );
+
+  const life = clamp((clock - 0.2) / 8, 0, 1);
+  const reach = life > 0.15 ? 2 : 1;
+  const leafA = clock < 5 ? P.leafNew : P.leafA;
+  const leafB = clock < 5 ? P.leafA : P.leafB;
+
+  setCell(col, row - 1, "'", P.leafNew, 9);
+  setCell(col - reach, row - 2, "*", leafA, 9);
+  setCell(col + reach, row - 2, "&", leafB, 9);
+  setCell(col - 1, row - 1, "\\", P.branch, 5);
+  setCell(col + 1, row - 1, "/", P.branch, 5);
+
+  if (life > 0.12) {
+    setCell(col - reach, row, ",", leafB, 6);
+    setCell(col + reach, row, "`", leafB, 6);
+  }
+  if (life > 0.58) {
+    setCell(col - 1, row - 3, "'", leafA, 6);
+    setCell(col + 1, row - 3, "&", leafB, 6);
+  }
+}
+
+function drawFireflies(ctx, now) {
+  if (!SKIES[skyName].fireflies) return;
+  ctx.font = `${render.fontSize}px ${MONO}`;
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+
+  const count = skyName === "night" ? 11 : 6;
+  for (let i = 0; i < count; i += 1) {
+    const h1 = Math.sin(i * 91.7 + tree.seed * 0.013) * 43758.5453;
+    const h2 = Math.sin(i * 47.3 + tree.seed * 0.029) * 12543.123;
+    const f1 = h1 - Math.floor(h1);
+    const f2 = h2 - Math.floor(h2);
+    const x =
+      render.W * (0.16 + f1 * 0.68) +
+      Math.sin(now * 0.00045 + i * 1.7) * 22;
+    const y =
+      render.H * (0.22 + f2 * 0.44) +
+      Math.cos(now * 0.00038 + i * 2.2) * 14;
+    const glow = 0.5 + 0.5 * Math.sin(now * 0.0011 + i * 2.4);
+
+    ctx.globalAlpha = 0.12 + glow * 0.32;
+    ctx.fillStyle = i % 3 === 0 ? PALETTE[P.bloom] : PALETTE[P.leafNew];
+    ctx.fillText(i % 4 === 0 ? "*" : ".", x, y);
+  }
+  ctx.globalAlpha = 1;
+}
+
+function drawAmbientCrown(clock, now) {
+  render.ambientLeaves = 0;
+  if (clock < 1.1) return;
+  const progress = clamp(clock / tree.completion, 0, 1);
+  if (progress > 0.82) return;
+
+  const patterns = [
+    [
+      [0, -1],
+      [-1, -1],
+      [1, -1],
+      [-1, 0],
+      [1, 0],
+      [0, -2],
+      [-2, -1],
+      [2, -1],
+    ],
+    [
+      [0, -1],
+      [0, -2],
+      [-1, 0],
+      [1, 0],
+      [-2, -1],
+      [2, -1],
+      [-1, -2],
+      [1, -2],
+    ],
+    [
+      [-1, -1],
+      [0, -2],
+      [1, -1],
+      [0, 0],
+      [-1, 0],
+      [1, 0],
+      [-2, -2],
+      [2, -2],
+    ],
+  ];
+  const foliage = ["&", "&", "&", "&", "*", "*", "o", "'", ".", ","];
+  let placed = 0;
+
+  for (const branch of tree.branches) {
+    if (branch.depth < 2 || placed > 360) continue;
+    const branchProgress = clamp(
+      (clock - branch.start) / branch.duration,
+      0,
+      1
+    );
+    if (branchProgress < 0.34) continue;
+
+    let hash = Math.imul(branch.id ^ tree.seed, 2654435761) >>> 0;
+    hash = (hash ^ (hash >>> 13)) >>> 0;
+    if ((hash & 3) === 0) continue;
+
+    const points = branch.points;
+    const exact = branchProgress * (points.length - 1);
+    const index = Math.floor(exact);
+    const next = Math.min(points.length - 1, index + 1);
+    const amount = exact - index;
+    const point = {
+      x: points[index].x + (points[next].x - points[index].x) * amount,
+      y: points[index].y + (points[next].y - points[index].y) * amount,
+    };
+    if (render.visible && point.y < render.visible.maxY * 0.38) continue;
+
+    const projected = project(point.x, point.y, branchSway(branch, point, now));
+    const tipCol = Math.floor(
+      projected.px / render.charW - render.offsetX / render.charW
+    );
+    const tipRow = Math.floor(
+      projected.py / render.lineH - render.offsetY / render.lineH
+    );
+
+    const pattern = patterns[hash % patterns.length];
+    for (let i = 0; i < pattern.length; i += 1) {
+      const offset = pattern[i];
+      const color =
+        i === 0
+          ? P.leafNew
+          : [P.leafA, P.leafB, P.leafC][(hash >>> (i + 3)) % 3];
+      const glyph = foliage[(hash >>> (i + 9)) % foliage.length];
+      if (setCell(tipCol + offset[0], tipRow + offset[1], glyph, color, 6)) {
+        placed += 1;
+        render.ambientLeaves += 1;
+      }
     }
   }
 }
@@ -1030,7 +1303,8 @@ function drawSpecks(ctx, now) {
 
   for (const speck of render.specks) {
     const twinkle = 0.45 + 0.55 * Math.sin(now * speck.speed + speck.phase);
-    ctx.globalAlpha = 0.18 + twinkle * 0.38;
+    ctx.globalAlpha =
+      (0.18 + twinkle * 0.38) * SKIES[skyName].speckAlpha;
     ctx.fillStyle = PALETTE[speck.tone];
     ctx.fillText(speck.char, render.cellX[speck.col], render.cellY[speck.row]);
   }
@@ -1110,6 +1384,7 @@ function updateUI(force = false) {
   const progress = stageProgress(seconds);
   const growth = growthClock();
   const visible = render.visible || { branches: 0, leaves: 0, maxY: 0 };
+  const totalLeaves = visible.leaves + (render.ambientLeaves || 0);
 
   const sessionText = formatClock(state.elapsedMs);
   const vscodeStale =
@@ -1139,7 +1414,18 @@ function updateUI(force = false) {
   setText(els.stageIndex, String(STAGES.indexOf(stage) + 1).padStart(2, "0"));
   setText(els.progressStage, stage.label);
   setText(els.progressNext, progress.next ? progress.next.label : "NO END");
+  setText(
+    els.progressEta,
+    progress.next
+      ? `IN ${formatRemaining(progress.next.at - seconds)}`
+      : "—"
+  );
   els.progressFill.style.width = `${(progress.ratio * 100).toFixed(1)}%`;
+  setText(
+    els.ringMetric,
+    String(1 + Math.floor(seconds / 3600)).padStart(2, "0")
+  );
+  setText(els.tendedMetric, formatTended(seconds));
   setText(els.growthStatus, statusLabel);
   setText(
     els.growthRate,
@@ -1186,7 +1472,7 @@ function updateUI(force = false) {
   setText(els.ageMetric, formatAge(seconds));
   setText(els.heightMetric, formatHeight(visible.maxY));
   setText(els.branchMetric, formatCount(visible.branches));
-  setText(els.leafMetric, formatCount(visible.leaves));
+  setText(els.leafMetric, formatCount(totalLeaves));
   setText(els.keyCount, `${formatCount(state.keys)} ${state.keys === 1 ? "key" : "keys"}`);
   setText(els.glyphCount, formatCount(render.glyphs || 0));
   setText(els.frameCount, String(render.frame || 0).padStart(6, "0"));
@@ -1211,7 +1497,7 @@ function updateUI(force = false) {
     updateUI.lastAriaAt = now;
     const summary = `${stage.name.toLowerCase()}. Session ${sessionText}. ${
       visible.branches
-    } branches, ${visible.leaves} leaves.`;
+    } branches, ${totalLeaves} leaves.`;
     els.canvas.setAttribute("aria-label", `Live ASCII tree. ${summary}`);
     els.treeAccessible.textContent = summary;
   }
@@ -1311,6 +1597,55 @@ function updateLocalClock() {
     second: "2-digit",
   });
   els.localClock.dateTime = now.toISOString();
+  updateSky();
+}
+
+function skyPhaseFor(date) {
+  const hour = date.getHours() + date.getMinutes() / 60;
+  if (hour >= 5 && hour < 8) return "dawn";
+  if (hour >= 8 && hour < 17) return "day";
+  if (hour >= 17 && hour < 20) return "dusk";
+  return "night";
+}
+
+function updateSky(force = false) {
+  const next = skyPhaseFor(new Date());
+  if (!force && next === skyName) return;
+  skyName = next;
+  PALETTE = SKIES[skyName].palette;
+  document.body.dataset.sky = skyName;
+  if (els.skyPhase) {
+    els.skyPhase.textContent = SKIES[skyName].label;
+  }
+  const themeMeta = document.querySelector('meta[name="theme-color"]');
+  if (themeMeta) {
+    themeMeta.setAttribute("content", SKIES[skyName].theme);
+  }
+  if (render && render.ready) {
+    draw(performance.now());
+  }
+}
+
+function toggleZen() {
+  setZen(!isZen);
+}
+
+function setZen(next) {
+  if (next === isZen) return;
+  isZen = next;
+  document.body.classList.toggle("is-zen", isZen);
+  els.zenButton.setAttribute("aria-pressed", String(isZen));
+  els.zenButton.setAttribute(
+    "aria-label",
+    isZen ? "Exit focus mode" : "Enter focus mode"
+  );
+  if (isZen) {
+    showToast("focus mode — press F or Esc to return.");
+  }
+  window.setTimeout(() => {
+    resizeCanvas();
+    camera.ready = false;
+  }, 40);
 }
 
 /* ── Interactions ───────────────────────────────────────────── */
@@ -1557,15 +1892,55 @@ function formatShortTime(seconds) {
   )}`;
 }
 
-function formatAge(seconds) {
-  const days = Math.floor(seconds * 2.4);
-  if (days < 1) return "0 days";
-  if (days < 60) return `${days} ${days === 1 ? "day" : "days"}`;
-  if (days < 730) {
-    const months = Math.max(2, Math.round(days / 30.44));
-    return `${months} months`;
+function formatRemaining(seconds) {
+  const total = Math.max(0, Math.ceil(seconds));
+  if (total < 60) return `${total}S`;
+  if (total < 3600) {
+    const minutes = Math.ceil(total / 60);
+    return minutes >= 60 ? "1H" : `${minutes}M`;
   }
-  const years = days / 365.25;
+  if (total < 86400) {
+    let hours = Math.floor(total / 3600);
+    let minutes = Math.ceil((total % 3600) / 60);
+    if (minutes >= 60) {
+      hours += 1;
+      minutes = 0;
+    }
+    return minutes > 0 ? `${hours}H ${minutes}M` : `${hours}H`;
+  }
+  let days = Math.floor(total / 86400);
+  let hours = Math.ceil((total % 86400) / 3600);
+  if (hours >= 24) {
+    days += 1;
+    hours = 0;
+  }
+  return hours > 0 ? `${days}D ${hours}H` : `${days}D`;
+}
+
+function formatTended(seconds) {
+  const total = Math.max(0, Math.floor(seconds));
+  if (total < 60) return "0M";
+  if (total < 3600) return `${Math.floor(total / 60)}M`;
+  if (total < 86400) {
+    const hours = Math.floor(total / 3600);
+    const minutes = Math.floor((total % 3600) / 60);
+    return minutes ? `${hours}H ${minutes}M` : `${hours}H`;
+  }
+  const days = Math.floor(total / 86400);
+  const hours = Math.floor((total % 86400) / 3600);
+  return hours ? `${days}D ${hours}H` : `${days}D`;
+}
+
+function formatAge(seconds) {
+  const years = seconds / 3600;
+  if (years < 0.08) {
+    const days = Math.max(0, Math.round(years * 365));
+    return `${days} ${days === 1 ? "day" : "days"}`;
+  }
+  if (years < 2) {
+    const months = Math.max(1, Math.round(years * 12));
+    return `${months} ${months === 1 ? "month" : "months"}`;
+  }
   return `${years.toFixed(1)} years`;
 }
 
